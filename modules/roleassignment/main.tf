@@ -13,7 +13,7 @@ resource "random_uuid" "this" {
 }
 
 resource "azapi_resource" "this" {
-  type = "Microsoft.Authorization/roleAssignments@2025-04-01"
+  type = "Microsoft.Authorization/roleAssignments@2022-04-01"
   body = {
     properties = local.role_assignment_properties
   }
