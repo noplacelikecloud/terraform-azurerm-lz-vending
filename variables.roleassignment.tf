@@ -1,18 +1,19 @@
 variable "role_assignment_enabled" {
-  type        = bool
+  type = bool
   description = <<DESCRIPTION
-Whether to create role assignments.
-If enabled, supply the list of role assignments in `var.role_assignments`.
+Enable creation of RBAC role assignments defined in `var.role_assignments`.
+Set to `false` to skip all role assignment resources (useful for phased
+deployments or when only networking / identity scaffolding is desired).
 DESCRIPTION
-  default     = false
+  default = false
 }
 
 variable "role_assignments" {
   type = map(object({
-    definition                = string,
-    principal_id              = optional(string),
-    group_key_reference       = optional(string, ""),
-    relative_scope            = optional(string, "")
+    definition                = string
+    principal_id              = optional(string)
+    group_key_reference       = optional(string)
+    relative_scope            = optional(string)
     condition                 = optional(string)
     condition_version         = optional(string)
     principal_type            = optional(string)
@@ -20,43 +21,50 @@ variable "role_assignments" {
     use_random_uuid           = optional(bool, false)
   }))
   description = <<DESCRIPTION
-Supply a map of objects containing the details of the role assignments to create.
+Map of role assignment objects.
 
-Object fields:
+Principal Resolution:
+If `group_key_reference` is supplied and resolves to a created group key in
+`var.groups` (with group creation enabled), that group's object id is used.
+Otherwise `principal_id` must be supplied.
 
-- `principal_id`: The directory/object id of the principal to assign the role to.
-- `group_key_reference`: (optional) The key of a group in the `var.groups` variable to assign the role to. If supplied, this will override `principal_id`.
-- `definition`: The role definition to assign. Either use the name or the role definition resource id.
-- `relative_scope`: (optional) Scope relative to the created subscription. Omit, or leave blank for subscription scope.
-- `condition`: (optional) A condition to apply to the role assignment. See [Conditions Custom Security Attributes](https://learn.microsoft.com/azure/role-based-access-control/conditions-custom-security-attributes) for more details.
-- `condition_version`: (optional) The version of the condition syntax. See [Conditions Custom Security Attributes](https://learn.microsoft.com/azure/role-based-access-control/conditions-custom-security-attributes) for more details.
-- `principal_type`: (optional) The type of the principal. Can be `"User"`, `"Group"`, `"Device"`, `"ForeignGroup"`, or `"ServicePrincipal"`.
-- `definition_lookup_enabled`: (optional) Whether to look up the role definition resource id from the role definition name. If disabled, the `definition` must be a role definition resource id. Default is `true`.
-- `use_random_uuid`: (optional) Whether to use a random UUID for the role assignment name. Default is `false`. If set to `true`, the role assignment name will be a random UUID, otherwise it will be a deterministic UUID based on the scope, principal id, and role definition id.
+Fields:
+- `definition` (string, required) – Role definition name or resource id.
+- `principal_id` (string, optional) – Object id (user / group / service principal / managed identity).
+- `group_key_reference` (string, optional) – Key referencing a group defined in `var.groups`.
+- `relative_scope` (string, optional) – Suffix appended to subscription id (e.g. `/resourceGroups/rg1`).
+- `condition` / `condition_version` (optional) – ABAC condition settings.
+- `principal_type` (string, optional) – Required when using ABAC conditions (User, Group, ServicePrincipal, Device, ForeignGroup).
+- `definition_lookup_enabled` (bool, default true) – Resolve `definition` name to id.
+- `use_random_uuid` (bool, default false) – Randomize name to avoid recreation on value changes.
 
-E.g.
-
-```terraform
+Example:
+```hcl
 role_assignments = {
-  # Example using role definition name:
-  contributor_user = {
-    principal_id      = "00000000-0000-0000-0000-000000000000",
-    definition        = "Contributor",
-    relative_scope    = "",
-    condition         = "(!(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read'} AND NOT SubOperationMatches{'Blob.List'})",
-    condition_version = "2.0",
-  },
-  # Example using role definition id and RG scope:
-  myrg_custom_role = {
-    principal_id   = "11111111-1111-1111-1111-111111111111",
-    definition     = "/providers/Microsoft.Management/managementGroups/mymg/providers/Microsoft.Authorization/roleDefinitions/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-    relative_scope = "/resourceGroups/MyRg",
+  contributors_group = {
+    group_key_reference       = "platform_engineers"
+    definition                = "Contributor"
+    relative_scope            = ""
+    definition_lookup_enabled = true
+  }
+  storage_reader_user = {
+    principal_id   = "11111111-1111-1111-1111-111111111111"
+    definition     = "Reader"
+    relative_scope = "/resourceGroups/app1-rg"
   }
 }
 ```
 DESCRIPTION
-  nullable    = false
-  default     = {}
+  nullable = false
+  default  = {}
+
+  validation {
+    condition = alltrue([
+      for k, v in var.role_assignments :
+      (try(v.principal_id, null) != null) || (try(v.group_key_reference, null) != null)
+    ])
+    error_message = "Each role assignment must define either principal_id or group_key_reference."
+  }
 }
 
 variable "wait_for_umi_before_umi_role_assignment_operations" {

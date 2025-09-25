@@ -144,6 +144,8 @@ The following requirements are needed by this module:
 
 - <a name="requirement_time"></a> [time](#requirement\_time) (~> 0.9)
 
+- <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) (~> 2.29)
+
 ## Modules
 
 The following Modules are called:
@@ -456,55 +458,95 @@ Type: `bool`
 
 Default: `false`
 
-### <a name="input_role_assignments"></a> [role\_assignments](#input\_role\_assignments)
+### <a name="input_role_assignments"></a> [role\_assignments](#input_role_assignments)
 
-Description: Supply a map of objects containing the details of the role assignments to create.
+Description: Map of role assignment objects. Each object must supply either `principal_id` or `group_key_reference`. If `group_key_reference` matches a key in `var.groups` (and `azuread_group_creation_enabled` is true) the group's object id is used; otherwise `principal_id` is used.
 
-Object fields:
+Fields:
+- `definition` (required) – Role definition name or resource id.
+- `principal_id` (optional) – Object id of user / group / service principal / managed identity.
+- `group_key_reference` (optional) – Key referencing a group declared in `var.groups`.
+- `relative_scope` (optional) – Path suffix relative to subscription (e.g. `/resourceGroups/app1-rg`).
+- `condition` / `condition_version` (optional) – ABAC condition and syntax version.
+- `principal_type` (optional) – Required for ABAC conditions (User, Group, ServicePrincipal, Device, ForeignGroup).
+- `definition_lookup_enabled` (optional, default true) – Resolve definition name to id.
+- `use_random_uuid` (optional, default false) – Randomize name to avoid churn when late-bound values change.
 
-- `principal_id`: The directory/object id of the principal to assign the role to.
-- `definition`: The role definition to assign. Either use the name or the role definition resource id.
-- `relative_scope`: (optional) Scope relative to the created subscription. Omit, or leave blank for subscription scope.
-- `condition`: (optional) A condition to apply to the role assignment. See [Conditions Custom Security Attributes](https://learn.microsoft.com/azure/role-based-access-control/conditions-custom-security-attributes) for more details.
-- `condition_version`: (optional) The version of the condition syntax. See [Conditions Custom Security Attributes](https://learn.microsoft.com/azure/role-based-access-control/conditions-custom-security-attributes) for more details.
-- `principal_type`: (optional) The type of the principal. Can be `"User"`, `"Group"`, `"Device"`, `"ForeignGroup"`, or `"ServicePrincipal"`.
-- `definition_lookup_enabled`: (optional) Whether to look up the role definition resource id from the role definition name. If disabled, the `definition` must be a role definition resource id. Default is `true`.
-- `use_random_uuid`: (optional) Whether to use a random UUID for the role assignment name. Default is `false`. If set to `true`, the role assignment name will be a random UUID, otherwise it will be a deterministic UUID based on the scope, principal id, and role definition id.
-
-E.g.
-
-```terraform
+Example:
+```hcl
 role_assignments = {
-  # Example using role definition name:
-  contributor_user = {
-    principal_id      = "00000000-0000-0000-0000-000000000000",
-    definition        = "Contributor",
-    relative_scope    = "",
-    condition         = "(!(ActionMatches{'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read'} AND NOT SubOperationMatches{'Blob.List'})",
-    condition_version = "2.0",
-  },
-  # Example using role definition id and RG scope:
-  myrg_custom_role = {
-    principal_id   = "11111111-1111-1111-1111-111111111111",
-    definition     = "/providers/Microsoft.Management/managementGroups/mymg/providers/Microsoft.Authorization/roleDefinitions/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-    relative_scope = "/resourceGroups/MyRg",
+  contributors_group = {
+    group_key_reference       = "platform_engineers"
+    definition                = "Contributor"
+    relative_scope            = ""
+    definition_lookup_enabled = true
+  }
+  storage_reader_user = {
+    principal_id   = "11111111-1111-1111-1111-111111111111"
+    definition     = "Reader"
+    relative_scope = "/resourceGroups/app1-rg"
   }
 }
 ```
 
 Type:
-
 ```hcl
 map(object({
-    principal_id              = string,
-    definition                = string,
-    relative_scope            = optional(string, "")
-    condition                 = optional(string)
-    condition_version         = optional(string)
-    principal_type            = optional(string)
-    definition_lookup_enabled = optional(bool, true)
-    use_random_uuid           = optional(bool, false)
-  }))
+  definition                = string
+  principal_id              = optional(string)
+  group_key_reference       = optional(string)
+  relative_scope            = optional(string, "")
+  condition                 = optional(string)
+  condition_version         = optional(string)
+  principal_type            = optional(string)
+  definition_lookup_enabled = optional(bool, true)
+  use_random_uuid           = optional(bool, false)
+}))
+```
+
+Default: `{}`
+
+### <a name="input_azuread_group_creation_enabled"></a> [azuread_group_creation_enabled](#input_azuread_group_creation_enabled)
+
+Description: Enable or disable creation of Azure AD groups defined in `var.groups`. If disabled, any `group_key_reference` in role assignments is ignored and `principal_id` must be provided.
+
+Type: `bool`
+
+Default: `true`
+
+### <a name="input_groups"></a> [groups](#input_groups)
+
+Description: Map of Azure AD groups to create. Keys must be static (known at plan). Each object supports:
+- `display_name` (required)
+- `mail_nickname` (required)
+- `description` (optional)
+- `owners` (optional list of object ids)
+- `members` (optional list of object ids)
+- `security_enabled` (optional, default true)
+- `visibility` (optional, default `Private`, allowed: `Private`, `Public`, `HiddenMembership`)
+
+Example:
+```hcl
+groups = {
+  platform_engineers = {
+    display_name  = "Platform Engineers"
+    mail_nickname = "plateng"
+    owners        = ["00000000-0000-0000-0000-000000000001"]
+  }
+}
+```
+
+Type:
+```hcl
+map(object({
+  display_name     = string
+  mail_nickname    = string
+  description      = optional(string)
+  owners           = optional(list(string), [])
+  members          = optional(list(string), [])
+  security_enabled = optional(bool, true)
+  visibility       = optional(string, "Private")
+}))
 ```
 
 Default: `{}`

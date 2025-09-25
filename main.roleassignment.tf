@@ -1,3 +1,30 @@
+###############################################
+# Role Assignments (Management Plane RBAC)
+# ---------------------------------------
+# This block instantiates the local roleassignment sub-module for each
+# entry in `var.role_assignments` when `var.role_assignment_enabled` is true.
+#
+# Principal Resolution Precedence:
+# 1. If a `group_key_reference` is supplied AND the group exists in `var.groups`
+#    AND group creation is enabled (`var.azuread_group_creation_enabled`), the
+#    Azure AD group's object id is used as the principal id.
+# 2. Otherwise the provided `principal_id` value is used.
+#
+# Input Validation:
+# A validation rule in `variables.roleassignment.tf` enforces that each
+# role assignment object supplies at least one of `principal_id` or
+# `group_key_reference` to avoid ambiguous / empty principal ids.
+#
+# Deterministic vs Random UUID for Name:
+# The underlying sub-module can derive a stable UUID from the tuple
+# (scope, principal_id, role_definition_id) unless `use_random_uuid` is
+# explicitly set, in which case a random UUID is generated to mitigate
+# perpetual diffs caused by late-bound values.
+#
+# NOTE: If you disable group creation but still supply a `group_key_reference`,
+# the condition below safely falls back to `principal_id` (no attempt to
+# dereference a non-created resource is made).
+###############################################
 # The roleassignments module creates role assignments from the data
 # supplied in the var.role_assignments variable
 module "roleassignment" {
@@ -9,11 +36,13 @@ module "roleassignment" {
     module.virtualnetwork,
   ]
   for_each                                  = { for k, v in var.role_assignments : k => v if var.role_assignment_enabled }
-  role_assignment_principal_id              = lookup(
-    var.groups,
-    each.value.group_key_reference,
-    null
-  ) != null ? try(azuread_group.this[each.value.group_key_reference].id, "") : each.value.principal_id
+  # Resolve the principal id using group reference precedence (see header comment)
+  role_assignment_principal_id = (
+    var.azuread_group_creation_enabled &&
+    try(each.value.group_key_reference, null) != null &&
+    each.value.group_key_reference != "" &&
+    contains(keys(var.groups), each.value.group_key_reference)
+  ) ? azuread_group.this[each.value.group_key_reference].id : each.value.principal_id
   role_assignment_definition                = each.value.definition
   role_assignment_scope                     = "${local.subscription_resource_id}${each.value.relative_scope}"
   role_assignment_condition                 = each.value.condition

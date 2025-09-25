@@ -1,21 +1,39 @@
 variable "azuread_group_creation_enabled" {
-    description = "Enable or disable the creation of Azure AD groups."
-    type        = bool
-    default     = true
+    description = <<DESCRIPTION
+Enable or disable the creation of Azure AD groups defined in `var.groups`.
+If disabled, no `azuread_group` resources will be created and any
+`group_key_reference` in role assignments will be ignored (the module
+will fall back to the explicit `principal_id`).
+DESCRIPTION
+    type    = bool
+    default = true
 }
 
 variable "groups" {
     description = <<DESCRIPTION
-A map of the Azure AD groups to create. The map key must be known at the plan stage, e.g. must not be calculated and known only after apply.
-### Required fields
-- `display_name`: The display name for the group. Changing this forces a new resource to be created. [required]
-- `mail_nickname`: The mail nickname for the group. Changing this forces a new resource to be created. [required]
-### Optional fields
-- `description`: The description for the group. [optional]
-- `owners`: A list of user object IDs to assign as owners of the group. [optional]
-- `members`: A list of user, group, or service principal object IDs to assign as members of the group. [optional]
-- `security_enabled`: A boolean flag to indicate whether the group is a security group. Defaults to true. [optional]
-- `visibility`: The visibility of the group. Possible values are 'Private', 'Public', and 'HiddenMembership'. Defaults to 'Private'. [optional]
+A map of Azure AD groups to create. The map key must be known at plan time (static key set).
+
+Required fields:
+- `display_name` (string) – Display name (forces recreation if changed)
+- `mail_nickname` (string) – Mail nickname (forces recreation if changed)
+
+Optional fields:
+- `description` (string)
+- `owners` (list(string)) – Object IDs of users to set as owners
+- `members` (list(string)) – Object IDs of users / groups / service principals as members
+- `security_enabled` (bool, default true)
+- `visibility` (string, one of `Private`, `Public`, `HiddenMembership`; default `Private`)
+
+Usage:
+```hcl
+groups = {
+    platform_engineers = {
+        display_name  = "Platform Engineers"
+        mail_nickname = "plateng"
+        owners        = ["00000000-0000-0000-0000-000000000001"]
+    }
+}
+```
 DESCRIPTION
     type = map(object({
         display_name     = string
@@ -26,6 +44,6 @@ DESCRIPTION
         security_enabled = optional(bool, true)
         visibility       = optional(string, "Private")
     }))
-    nullable    = false
-    default     = {}
+    nullable = false
+    default  = {}
 }
