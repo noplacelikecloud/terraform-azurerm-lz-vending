@@ -37,9 +37,9 @@ groups = {
 DESCRIPTION
   type = map(object({
     display_name     = string
+    owners           = list(string)
     mail_nickname    = optional(string)
     description      = optional(string)
-    owners           = optional(list(string), [])
     members          = optional(list(string), [])
     security_enabled = optional(bool, true)
     visibility       = optional(string, "Private")
