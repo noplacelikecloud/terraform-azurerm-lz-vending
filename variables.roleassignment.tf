@@ -9,8 +9,9 @@ DESCRIPTION
 
 variable "role_assignments" {
   type = map(object({
-    principal_id              = string,
     definition                = string,
+    principal_id              = optional(string),
+    group_key_reference       = optional(string, ""),
     relative_scope            = optional(string, "")
     condition                 = optional(string)
     condition_version         = optional(string)
@@ -24,6 +25,7 @@ Supply a map of objects containing the details of the role assignments to create
 Object fields:
 
 - `principal_id`: The directory/object id of the principal to assign the role to.
+- `group_key_reference`: (optional) The key of a group in the `var.groups` variable to assign the role to. If supplied, this will override `principal_id`.
 - `definition`: The role definition to assign. Either use the name or the role definition resource id.
 - `relative_scope`: (optional) Scope relative to the created subscription. Omit, or leave blank for subscription scope.
 - `condition`: (optional) A condition to apply to the role assignment. See [Conditions Custom Security Attributes](https://learn.microsoft.com/azure/role-based-access-control/conditions-custom-security-attributes) for more details.
