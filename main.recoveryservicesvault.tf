@@ -12,5 +12,4 @@ module "rsv" {
     sku                 = rsv_v.sku
     tags                = rsv_v.tags
     soft_delete_enabled = rsv_v.soft_delete_enabled
-  
 }
