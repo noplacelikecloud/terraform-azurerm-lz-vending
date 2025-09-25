@@ -27,7 +27,7 @@ resource "azurerm_monitor_diagnostic_setting" "vnet" {
     storage_account_id = can(var.diagnostic_settings.storage_account_id) && var.diagnostic_settings.storage_account_id != null && var.diagnostic_settings.storage_type == "StorageAccount" ? var.diagnostic_settings.storage_account_id : null
 
     enabled_log {
-        category = "AuditEvent"
+        category_group = "allLogs"
     }
 
     enabled_metric {
