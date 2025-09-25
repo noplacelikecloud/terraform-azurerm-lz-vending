@@ -19,6 +19,8 @@ This is currently split logically into the following capabilities:
   - Hub & spoke connectivity (peering to a hub network)
   - vWAN connectivity
   - Mesh peering (peering between spokes)
+- Recovery Services Vault (backup) deployment
+- Optional Diagnostic Settings (Log Analytics or Storage Account) for Recovery Services Vaults and Virtual Networks
 - Role assignments
 - Resource provider (and feature) registration
 - Resource group creation
@@ -207,6 +209,12 @@ Version:
 ### <a name="module_virtualnetwork"></a> [virtualnetwork](#module\_virtualnetwork)
 
 Source: ./modules/virtualnetwork
+
+Version:
+
+### <a name="module_recoveryservicesvault"></a> [recoveryservicesvault](#module_recoveryservicesvault)
+
+Source: ./modules/recoveryservicesvault
 
 Version:
 
