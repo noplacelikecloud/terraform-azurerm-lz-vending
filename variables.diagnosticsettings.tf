@@ -50,7 +50,7 @@ variable "diagnostic_settings" {
   }
 
   validation {
-    condition = (var.diagnostic_settings.resource_group_key_reference != null) || (var.diagnostic_settings.resource_group_name_existing != null)
+    condition = var.diagnostic_settings.deploy_log_analytics_workspace ? (var.diagnostic_settings.resource_group_key_reference != null || var.diagnostic_settings.resource_group_name_existing != null) : true
     error_message = "One of 'resource_group_key_reference' or 'resource_group_name_existing' must be specified."
   }
 
