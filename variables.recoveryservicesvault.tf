@@ -32,4 +32,12 @@ DESCRIPTION
     }))
     nullable    = false
     default     = {}
+
+    validation {
+        condition = alltrue([
+            for k, v in var.recovery_services_vaults :
+            (try(v.resource_group_key, null) != null) || (try(v.resource_group_name_existing, null) != null)
+        ])
+        error_message = "One of 'resource_group_key' or 'resource_group_name_existing' must be specified for all recovery services vaults."
+    }
 }

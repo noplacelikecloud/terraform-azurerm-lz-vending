@@ -7,7 +7,7 @@ variable "route_table_enabled" {
 variable "route_tables" {
   type = map(object({
     name                          = string
-    location                      = string
+    location                      = optional(string)
     resource_group_key            = optional(string)
     resource_group_name_existing  = optional(string)
     bgp_route_propagation_enabled = optional(bool, true)

@@ -6,7 +6,7 @@ module "routetable" {
   parent_id                     = "${local.subscription_resource_id}/resourceGroups/${each.value.resource_group_name}"
   bgp_route_propagation_enabled = each.value.bgp_route_propagation_enabled
   name                          = each.value.name
-  location                      = each.value.location
+  location                      = coalesce(each.value.location, var.location)
   routes                        = each.value.routes
   tags                          = each.value.tags
 }
