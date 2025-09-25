@@ -1,16 +1,16 @@
 variable "azuread_group_creation_enabled" {
-    description = <<DESCRIPTION
+  description = <<DESCRIPTION
 Enable or disable the creation of Azure AD groups defined in `var.groups`.
 If disabled, no `azuread_group` resources will be created and any
 `group_key_reference` in role assignments will be ignored (the module
 will fall back to the explicit `principal_id`).
 DESCRIPTION
-    type    = bool
-    default = true
+  type        = bool
+  default     = true
 }
 
 variable "groups" {
-    description = <<DESCRIPTION
+  description = <<DESCRIPTION
 A map of Azure AD groups to create. The map key must be known at plan time (static key set).
 
 Required fields:
@@ -35,15 +35,15 @@ groups = {
 }
 ```
 DESCRIPTION
-    type = map(object({
-        display_name     = string
-        mail_nickname    = string
-        description      = optional(string)
-        owners           = optional(list(string), [])
-        members          = optional(list(string), [])
-        security_enabled = optional(bool, true)
-        visibility       = optional(string, "Private")
-    }))
-    nullable = false
-    default  = {}
+  type = map(object({
+    display_name     = string
+    mail_nickname    = optional(string)
+    description      = optional(string)
+    owners           = optional(list(string), [])
+    members          = optional(list(string), [])
+    security_enabled = optional(bool, true)
+    visibility       = optional(string, "Private")
+  }))
+  nullable = false
+  default  = {}
 }

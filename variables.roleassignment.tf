@@ -1,11 +1,11 @@
 variable "role_assignment_enabled" {
-  type = bool
+  type        = bool
   description = <<DESCRIPTION
 Enable creation of RBAC role assignments defined in `var.role_assignments`.
 Set to `false` to skip all role assignment resources (useful for phased
 deployments or when only networking / identity scaffolding is desired).
 DESCRIPTION
-  default = false
+  default     = false
 }
 
 variable "role_assignments" {
@@ -55,8 +55,8 @@ role_assignments = {
 }
 ```
 DESCRIPTION
-  nullable = false
-  default  = {}
+  nullable    = false
+  default     = {}
 
   validation {
     condition = alltrue([

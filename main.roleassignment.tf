@@ -35,7 +35,7 @@ module "roleassignment" {
     module.usermanagedidentity,
     module.virtualnetwork,
   ]
-  for_each                                  = { for k, v in var.role_assignments : k => v if var.role_assignment_enabled }
+  for_each = { for k, v in var.role_assignments : k => v if var.role_assignment_enabled }
   # Resolve the principal id using group reference precedence (see header comment)
   role_assignment_principal_id = (
     var.azuread_group_creation_enabled &&
