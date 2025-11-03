@@ -65,12 +65,7 @@ DESCRIPTION
 
 output "virtual_networks" {
   description = "A JSON string with virtual network names as keys and objects containing ID and subnets as values."
-  value = jsonencode({
-    for k, v in module.virtualnetwork.virtual_network_resource_ids : k => {
-      id      = v
-      subnets = try(module.virtualnetwork.subnet_resource_ids[k], {})
-    }
-  })
+  value = jsonencode(var.virtual_networks)
 }
 
 output "log_analytics_workspace" {
