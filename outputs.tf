@@ -63,7 +63,22 @@ DESCRIPTION
   value       = local.umi_tenant_ids
 }
 
-output "virtual_network_resource_ids" {
-  description = "A map of virtual network resource ids, keyed by the var.virtual_networks input map. Only populated if the virtualnetwork submodule is enabled."
-  value       = local.virtual_network_resource_ids
+output "virtual_networks" {
+  description = "A JSON string with virtual network names as keys and objects containing ID and subnets as values."
+  value = jsonencode({
+    for k, v in module.virtualnetwork.virtual_network_resource_ids : k => {
+      id      = v
+      subnets = try(module.virtualnetwork.subnet_resource_ids[k], {})
+    }
+  })
+}
+
+output "log_analytics_workspace" {
+  description = "The Log Analytics Workspace resource ID."
+  value       = module.log_analytics.log_analytics_workspace_id
+}
+
+output "recovery_services_vaults" {
+  description = "A map of Recovery Services Vault resource IDs, keyed by the var.recovery_services_vaults input map."
+  value       = { for k, v in module.recoveryservicesvault : k => v.recovery_services_vault_id }
 }
