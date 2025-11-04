@@ -9,3 +9,15 @@ variable "deploy_lv4_statestorage_account" {
     type        = bool
     default     = false
 }
+
+variable "lv4_statestorage_resource_group_existing" {
+    description = "The name of an existing resource group to deploy the level 4 state storage account into. If not provided, the storage account will be deployed into the main resource group."
+    type        = string
+    default     = null
+}
+
+variable "lv4_statestorage_resource_group_key" {
+    description = "The key reference to the resource group in which to deploy the level 4 state storage account, if using multiple resource groups."
+    type        = string
+    default     = null
+}

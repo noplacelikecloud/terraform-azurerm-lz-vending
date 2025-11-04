@@ -67,13 +67,3 @@ output "virtual_networks" {
   description = "A JSON string with virtual network names as keys and objects containing ID and subnets as values."
   value = jsonencode(var.virtual_networks)
 }
-
-output "log_analytics_workspace" {
-  description = "The Log Analytics Workspace resource ID."
-  value       = module.log_analytics.log_analytics_workspace_id
-}
-
-output "recovery_services_vaults" {
-  description = "A map of Recovery Services Vault resource IDs, keyed by the var.recovery_services_vaults input map."
-  value       = { for k, v in module.recoveryservicesvault : k => v.recovery_services_vault_id }
-}

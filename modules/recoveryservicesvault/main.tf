@@ -14,7 +14,7 @@ resource "azapi_resource" "rsv" {
   type      = "Microsoft.RecoveryServices/vaults@2023-02-01"
   name      = var.name
   location  = var.location
-  parent_id = var.resource_group_name != null ? azurerm_resource_group.rg.id : null
+  parent_id = var.parent_id
   tags      = var.tags
 
   body = jsonencode({

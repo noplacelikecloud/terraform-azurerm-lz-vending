@@ -5,10 +5,7 @@ module "rsv" {
 
   name     = each.value.name
   location = coalesce(each.value.location, var.location)
-  resource_group_name = coalesce(
-    can(module.resourcegroup[each.value.resource_group_key].resource_group_name) ? module.resourcegroup[each.value.resource_group_key].resource_group_name : null,
-    each.value.resource_group_name_existing != null ? each.value.resource_group_name_existing : null
-  )
+  parent_id = "/subscriptions/${local.subscription_id}/resourceGroups/${can(module.resourcegroup[each.value.resource_group_key].resource_group_name) ? module.resourcegroup[each.value.resource_group_key].resource_group_name : null}/providers/Microsoft.RecoveryServices/vaults/${each.value.name}"
   sku                 = each.value.sku
   tags                = each.value.tags
   soft_delete_enabled = each.value.soft_delete_enabled

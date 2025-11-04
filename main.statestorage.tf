@@ -1,5 +1,5 @@
 # This is deprecated - Use AzAPI
-resource "azurerm_storage_account" "lv4_statestorage" {
+/* resource "azurerm_storage_account" "lv4_statestorage" {
     count                    = var.deploy_lv4_statestorage_account ? 1 : 0
     name                     = var.lv4_statestorage_account_name
     resource_group_name      = module.resourcegroup.resource_group_name
@@ -11,7 +11,7 @@ resource "azurerm_storage_account" "lv4_statestorage" {
     
     
     depends_on = [module.resourcegroup]
-}
+} */
 
 # AzAPI
 resource "azapi_resource" "lv4_statestorage" {
@@ -19,7 +19,7 @@ resource "azapi_resource" "lv4_statestorage" {
     type      = "Microsoft.Storage/storageAccounts@2022-09-01"
     name      = var.lv4_statestorage_account_name
     location  = var.location
-    parent_id = module.resourcegroup.resource_group_id
+    parent_id = coalesce(var.lv4_statestorage_resource_group_existing, module.resourcegroup[var.lv4_statestorage_resource_group_key].resource_group_id)
 
     body = jsonencode({
         properties = {
