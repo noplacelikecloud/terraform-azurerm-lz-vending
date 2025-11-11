@@ -51,7 +51,7 @@ resource "azapi_resource" "vnet_diagnostic_setting" {
         properties = {
             workspaceId = coalesce(
                 var.diagnostic_settings.existing_log_analytics_workspace_id != null ? var.diagnostic_settings.existing_log_analytics_workspace_id : null,
-                var.diagnostic_settings.deploy_log_analytics_workspace && var.diagnostic_settings.storage_type == "LogAnalytics" ? azapi_resource.this[0].id : null
+                var.diagnostic_settings.deploy_log_analytics_workspace && var.diagnostic_settings.storage_type == "LogAnalytics" ? azapi_resource.law[0].id : null
             )
             storageAccountId = can(var.diagnostic_settings.storage_account_id) && var.diagnostic_settings.storage_account_id != null && var.diagnostic_settings.storage_type == "StorageAccount" ? var.diagnostic_settings.storage_account_id : null
             logs = [
@@ -70,6 +70,6 @@ resource "azapi_resource" "vnet_diagnostic_setting" {
     })
     depends_on = [
         module.rsv,
-        azurerm_log_analytics_workspace.this
+        azapi_resource.law
     ]
 }

@@ -23,7 +23,7 @@ data "azapi_resource" "rg" {
 }
 
 # AzAPI
-resource "azapi_resource" "this" {
+resource "azapi_resource" "law" {
   count = var.diagnostic_settings.deploy_log_analytics_workspace && var.diagnostic_settings.storage_type == "LogAnalytics" ? 1 : 0
 
   type      = "Microsoft.OperationalInsights/workspaces@2021-06-01"
