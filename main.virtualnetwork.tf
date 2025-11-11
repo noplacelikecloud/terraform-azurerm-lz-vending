@@ -48,7 +48,7 @@ resource "azapi_resource" "vnet_diagnostic_setting" {
     type      = "Microsoft.Insights/diagnosticSettings@2021-05-01-preview"
     name      = "${each.value.name}-diag"
     parent_id = module.virtualnetwork[0].virtual_network_resource_ids[each.key]
-    body = jsonencode({
+    body = {
         properties = {
             workspaceId = coalesce(
                 var.diagnostic_settings.existing_log_analytics_workspace_id != null ? var.diagnostic_settings.existing_log_analytics_workspace_id : null,
@@ -68,7 +68,7 @@ resource "azapi_resource" "vnet_diagnostic_setting" {
                 }
             ]
         }
-    })
+    }
     depends_on = [
         module.rsv,
         azapi_resource.law

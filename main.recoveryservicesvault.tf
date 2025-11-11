@@ -44,7 +44,7 @@ resource "azapi_resource" "rsv_diagnostic_setting" {
     type      = "Microsoft.Insights/diagnosticSettings@2021-05-01-preview"
     name      = "${each.value.name}-diag"
     parent_id = module.rsv[each.key].recovery_services_vault_id
-    body = jsonencode({
+    body = {
         properties = {
             workspaceId = coalesce(
                 var.diagnostic_settings.existing_log_analytics_workspace_id != null ? var.diagnostic_settings.existing_log_analytics_workspace_id : null,
@@ -72,7 +72,7 @@ resource "azapi_resource" "rsv_diagnostic_setting" {
                 }
             ]
         }
-    })
+    }
     depends_on = [
         module.rsv,
         azapi_resource.law

@@ -34,10 +34,10 @@ resource "azapi_resource" "law" {
     var.diagnostic_settings.resource_group_name_existing != null ? var.diagnostic_settings.resource_group_name_existing : null
   )}"
 
-  body = jsonencode({
+  body = {
     sku = {
       name = "PerGB2018"
     }
     retentionInDays = var.diagnostic_settings.retention_days
-  })
+  }
 }

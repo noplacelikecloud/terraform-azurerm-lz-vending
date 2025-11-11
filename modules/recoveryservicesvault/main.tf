@@ -17,12 +17,12 @@ resource "azapi_resource" "rsv" {
   parent_id = var.parent_id
   tags      = var.tags
 
-  body = jsonencode({
+  body = {
     properties = {
       sku = {
         name = var.sku
       }
       softDeleteFeatureState = var.soft_delete_enabled ? "Enabled" : "Disabled"
     }
-  })
+  }
 }
