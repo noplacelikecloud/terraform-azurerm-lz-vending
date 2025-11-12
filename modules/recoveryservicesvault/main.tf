@@ -19,10 +19,12 @@ resource "azapi_resource" "rsv" {
 
   body = {
     properties = {
-      sku = {
-        name = var.sku
+      securitySettings = {
+        softDeleteState = var.soft_delete_enabled ? "Enabled" : "Disabled"
       }
-      softDeleteFeatureState = var.soft_delete_enabled ? "Enabled" : "Disabled"
+    }
+    sku = {
+      name = var.sku
     }
   }
 }

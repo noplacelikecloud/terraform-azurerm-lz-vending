@@ -26,7 +26,7 @@ data "azapi_resource" "rg" {
 resource "azapi_resource" "law" {
   count = var.diagnostic_settings.deploy_log_analytics_workspace && var.diagnostic_settings.storage_type == "LogAnalytics" ? 1 : 0
 
-  type      = "Microsoft.OperationalInsights/workspaces@2021-06-01"
+  type      = "Microsoft.OperationalInsights/workspaces@2022-10-01"
   name      = var.diagnostic_settings.log_analytics_workspace_name
   location  = var.location
   parent_id = "/subscriptions/${local.subscription_id}/resourceGroups/${coalesce(
@@ -35,9 +35,11 @@ resource "azapi_resource" "law" {
   )}"
 
   body = {
-    sku = {
-      name = "PerGB2018"
+    properties = {
+      sku = {
+        name = "PerGB2018"
+      }
+      retentionInDays = var.diagnostic_settings.retention_days
     }
-    retentionInDays = var.diagnostic_settings.retention_days
   }
 }
