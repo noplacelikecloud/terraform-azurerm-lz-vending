@@ -11,7 +11,7 @@
 
 # AzAPI
 resource "azapi_resource" "rsv" {
-  type      = "Microsoft.RecoveryServices/vaults@2023-02-01"
+  type      = "Microsoft.RecoveryServices/vaults@2024-04-01"
   name      = var.name
   location  = var.location
   parent_id = var.parent_id
