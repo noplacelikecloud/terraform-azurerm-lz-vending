@@ -63,7 +63,7 @@ DESCRIPTION
   value       = local.umi_tenant_ids
 }
 
-output "virtual_network_resource_ids" {
-  description = "A map of virtual network resource ids, keyed by the var.virtual_networks input map. Only populated if the virtualnetwork submodule is enabled."
-  value       = local.virtual_network_resource_ids
+output "virtual_networks" {
+  description = "A JSON string with virtual network names as keys and objects containing ID and subnets as values."
+  value = jsonencode(var.virtual_networks)
 }

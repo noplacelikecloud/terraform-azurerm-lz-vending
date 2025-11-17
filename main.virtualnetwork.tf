@@ -11,11 +11,13 @@ module "virtualnetwork" {
   depends_on = [
     module.resourcegroup,
     module.routetable,
-    module.networksecuritygroup
+    module.networksecuritygroup,
+    module.subscription
   ]
 }
 
-resource "azurerm_monitor_diagnostic_setting" "vnet" {
+# AzureRM is retiring azurerm_monitor_diagnostic_setting in favor of AzAPI
+/* resource "azurerm_monitor_diagnostic_setting" "vnet" {
     for_each = { for vnet_k, vnet_v in var.virtual_networks : vnet_k => vnet_v if var.virtual_network_enabled && var.vnet_diagnostic_settings_enabled }
 
     name               = "${each.value.name}-diag"
@@ -37,5 +39,38 @@ resource "azurerm_monitor_diagnostic_setting" "vnet" {
     depends_on = [
         module.rsv,
         azurerm_log_analytics_workspace.this
+    ]
+} */
+
+# AzAPI Diagnostic Settings for Virtual Network
+resource "azapi_resource" "vnet_diagnostic_setting" {
+    for_each = { for vnet_k, vnet_v in var.virtual_networks : vnet_k => vnet_v if var.virtual_network_enabled && var.vnet_diagnostic_settings_enabled }
+    type      = "Microsoft.Insights/diagnosticSettings@2021-05-01-preview"
+    name      = "${each.value.name}-diag"
+    parent_id = module.virtualnetwork[0].virtual_network_resource_ids[each.key]
+    body = {
+        properties = {
+            workspaceId = coalesce(
+                var.diagnostic_settings.existing_log_analytics_workspace_id != null ? var.diagnostic_settings.existing_log_analytics_workspace_id : null,
+                var.diagnostic_settings.deploy_log_analytics_workspace && var.diagnostic_settings.storage_type == "LogAnalytics" ? azapi_resource.law[0].id : null
+            )
+            storageAccountId = can(var.diagnostic_settings.storage_account_id) && var.diagnostic_settings.storage_account_id != null && var.diagnostic_settings.storage_type == "StorageAccount" ? var.diagnostic_settings.storage_account_id : null
+            logs = [
+                {
+                    category = "VMProtectionAlerts"
+                    enabled  = true
+                }
+            ]
+            metrics = [
+                {
+                    category = "AllMetrics"
+                    enabled  = true
+                }
+            ]
+        }
+    }
+    depends_on = [
+        module.rsv,
+        azapi_resource.law
     ]
 }

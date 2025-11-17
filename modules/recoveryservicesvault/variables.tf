@@ -8,8 +8,8 @@ variable "location" {
   type        = string
 }
 
-variable "resource_group_name" {
-  description = "The name of the resource group in which to create the Recovery Services Vault."
+variable "parent_id" {
+  description = "The parent ID (resource ID) of the resource group in which to create the Recovery Services Vault."
   type        = string
 }
 
