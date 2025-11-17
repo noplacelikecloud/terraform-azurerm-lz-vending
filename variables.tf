@@ -32,3 +32,11 @@ module "lz_vending" {
 DESCRIPTION
   nullable    = false
 }
+
+variable "azurerm_dummy_subscription" {
+  type        = string
+  description = <<DESCRIPTION
+  AzureRM requires an active subscription to initialize the provider.
+  This variable is used to provide a dummy subscription ID to allow the provider to initialize whenever no subscription is provided. (Gets vendored by this module)
+  DESCRIPTION
+}
