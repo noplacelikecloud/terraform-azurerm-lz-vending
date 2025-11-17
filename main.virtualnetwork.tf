@@ -57,7 +57,7 @@ resource "azapi_resource" "vnet_diagnostic_setting" {
             storageAccountId = can(var.diagnostic_settings.storage_account_id) && var.diagnostic_settings.storage_account_id != null && var.diagnostic_settings.storage_type == "StorageAccount" ? var.diagnostic_settings.storage_account_id : null
             logs = [
                 {
-                    category = "AllLogs"
+                    category = "allLogs"
                     enabled  = true
                 }
             ]
