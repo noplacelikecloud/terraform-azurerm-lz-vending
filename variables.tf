@@ -39,4 +39,6 @@ variable "azurerm_dummy_subscription" {
   AzureRM requires an active subscription to initialize the provider.
   This variable is used to provide a dummy subscription ID to allow the provider to initialize whenever no subscription is provided. (Gets vendored by this module)
   DESCRIPTION
+  nullable    = true
+  default = null
 }
