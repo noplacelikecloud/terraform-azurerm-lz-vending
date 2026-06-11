@@ -65,5 +65,5 @@ DESCRIPTION
 
 output "virtual_networks" {
   description = "A JSON string with virtual network names as keys and objects containing ID and subnets as values."
-  value = jsonencode(var.virtual_networks)
+  value       = jsonencode(var.virtual_networks)
 }

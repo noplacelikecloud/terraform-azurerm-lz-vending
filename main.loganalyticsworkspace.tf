@@ -15,8 +15,8 @@
 data "azapi_resource" "rg" {
   count = var.diagnostic_settings.deploy_log_analytics_workspace && var.diagnostic_settings.storage_type == "LogAnalytics" && var.diagnostic_settings.resource_group_name_existing != null ? 1 : 0
 
-  type      = "Microsoft.Resources/resourceGroups@2021-04-01"
-  name      = coalesce(
+  type = "Microsoft.Resources/resourceGroups@2021-04-01"
+  name = coalesce(
     can(module.resourcegroup[var.diagnostic_settings.resource_group_key_reference].resource_group_name) ? module.resourcegroup[var.diagnostic_settings.resource_group_key_reference].resource_group_name : null,
     var.diagnostic_settings.resource_group_name_existing != null ? var.diagnostic_settings.resource_group_name_existing : null
   )
@@ -26,9 +26,9 @@ data "azapi_resource" "rg" {
 resource "azapi_resource" "law" {
   count = var.diagnostic_settings.deploy_log_analytics_workspace && var.diagnostic_settings.storage_type == "LogAnalytics" ? 1 : 0
 
-  type      = "Microsoft.OperationalInsights/workspaces@2022-10-01"
-  name      = var.diagnostic_settings.log_analytics_workspace_name
-  location  = var.location
+  type     = "Microsoft.OperationalInsights/workspaces@2022-10-01"
+  name     = var.diagnostic_settings.log_analytics_workspace_name
+  location = var.location
   parent_id = "/subscriptions/${local.subscription_id}/resourceGroups/${coalesce(
     can(module.resourcegroup[var.diagnostic_settings.resource_group_key_reference].resource_group_name) ? module.resourcegroup[var.diagnostic_settings.resource_group_key_reference].resource_group_name : null,
     var.diagnostic_settings.resource_group_name_existing != null ? var.diagnostic_settings.resource_group_name_existing : null

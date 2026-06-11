@@ -15,35 +15,35 @@
 
 # AzAPI
 resource "azapi_resource" "lv4_statestorage" {
-    count = var.deploy_lv4_statestorage_account ? 1 : 0
-    type      = "Microsoft.Storage/storageAccounts@2022-09-01"
-    name      = var.lv4_statestorage_account_name
-    location  = var.location
-    parent_id = coalesce(var.lv4_statestorage_resource_group_existing, module.resourcegroup[var.lv4_statestorage_resource_group_key].resource_group_resource_id)
+  count     = var.deploy_lv4_statestorage_account ? 1 : 0
+  type      = "Microsoft.Storage/storageAccounts@2022-09-01"
+  name      = var.lv4_statestorage_account_name
+  location  = var.location
+  parent_id = coalesce(var.lv4_statestorage_resource_group_existing, module.resourcegroup[var.lv4_statestorage_resource_group_key].resource_group_resource_id)
 
-    body = {
-        properties = {
-            accessTier             = "Hot"
-            minimumTlsVersion     = "TLS1_2"
-            supportsHttpsTrafficOnly = true
-            allowBlobPublicAccess = false
-            encryption = {
-                services = {
-                    blob = {
-                        enabled = true
-                    }
-                }
-                keySource = "Microsoft.Storage"
-            }
-            networkAcls = {
-                bypass = "AzureServices"
-                defaultAction = "Allow"
-            }
+  body = {
+    properties = {
+      accessTier               = "Hot"
+      minimumTlsVersion        = "TLS1_2"
+      supportsHttpsTrafficOnly = true
+      allowBlobPublicAccess    = false
+      encryption = {
+        services = {
+          blob = {
+            enabled = true
+          }
         }
-        sku = {
-            name = "Standard_LRS"
-        }
-        kind = "StorageV2"
+        keySource = "Microsoft.Storage"
+      }
+      networkAcls = {
+        bypass        = "AzureServices"
+        defaultAction = "Allow"
+      }
     }
-    depends_on = [module.resourcegroup]
+    sku = {
+      name = "Standard_LRS"
+    }
+    kind = "StorageV2"
+  }
+  depends_on = [module.resourcegroup]
 }

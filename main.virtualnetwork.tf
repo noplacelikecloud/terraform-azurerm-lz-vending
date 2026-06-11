@@ -26,7 +26,7 @@ module "virtualnetwork" {
         var.diagnostic_settings.existing_log_analytics_workspace_id != null ? var.diagnostic_settings.existing_log_analytics_workspace_id : null,
         var.diagnostic_settings.deploy_log_analytics_workspace && var.diagnostic_settings.storage_type == "LogAnalytics" ? azurerm_log_analytics_workspace.this[0].id : null
     )
-    storage_account_id = can(var.diagnostic_settings.storage_account_id) && var.diagnostic_settings.storage_account_id != null && var.diagnostic_settings.storage_type == "StorageAccount" ? var.diagnostic_settings.storage_account_id : null
+    storage_account_id = can(var.diagnostic_settings.existing_storage_account_id) && var.diagnostic_settings.existing_storage_account_id != null && var.diagnostic_settings.storage_type == "StorageAccount" ? var.diagnostic_settings.existing_storage_account_id : null
 
     enabled_log {
         category_group = "allLogs"
@@ -44,33 +44,33 @@ module "virtualnetwork" {
 
 # AzAPI Diagnostic Settings for Virtual Network
 resource "azapi_resource" "vnet_diagnostic_setting" {
-    for_each = { for vnet_k, vnet_v in var.virtual_networks : vnet_k => vnet_v if var.virtual_network_enabled && var.vnet_diagnostic_settings_enabled }
-    type      = "Microsoft.Insights/diagnosticSettings@2021-05-01-preview"
-    name      = "${each.value.name}-diag"
-    parent_id = module.virtualnetwork[0].virtual_network_resource_ids[each.key]
-    body = {
-        properties = {
-            workspaceId = coalesce(
-                var.diagnostic_settings.existing_log_analytics_workspace_id != null ? var.diagnostic_settings.existing_log_analytics_workspace_id : null,
-                var.diagnostic_settings.deploy_log_analytics_workspace && var.diagnostic_settings.storage_type == "LogAnalytics" ? azapi_resource.law[0].id : null
-            )
-            storageAccountId = can(var.diagnostic_settings.storage_account_id) && var.diagnostic_settings.storage_account_id != null && var.diagnostic_settings.storage_type == "StorageAccount" ? var.diagnostic_settings.storage_account_id : null
-            logs = [
-                {
-                    category = "VMProtectionAlerts"
-                    enabled  = true
-                }
-            ]
-            metrics = [
-                {
-                    category = "AllMetrics"
-                    enabled  = true
-                }
-            ]
+  for_each  = { for vnet_k, vnet_v in var.virtual_networks : vnet_k => vnet_v if var.virtual_network_enabled && var.vnet_diagnostic_settings_enabled }
+  type      = "Microsoft.Insights/diagnosticSettings@2021-05-01-preview"
+  name      = "${each.value.name}-diag"
+  parent_id = module.virtualnetwork[0].virtual_network_resource_ids[each.key]
+  body = {
+    properties = {
+      workspaceId = coalesce(
+        var.diagnostic_settings.existing_log_analytics_workspace_id != null ? var.diagnostic_settings.existing_log_analytics_workspace_id : null,
+        var.diagnostic_settings.deploy_log_analytics_workspace && var.diagnostic_settings.storage_type == "LogAnalytics" ? azapi_resource.law[0].id : null
+      )
+      storageAccountId = can(var.diagnostic_settings.existing_storage_account_id) && var.diagnostic_settings.existing_storage_account_id != null && var.diagnostic_settings.storage_type == "StorageAccount" ? var.diagnostic_settings.existing_storage_account_id : null
+      logs = [
+        {
+          category = "VMProtectionAlerts"
+          enabled  = true
         }
+      ]
+      metrics = [
+        {
+          category = "AllMetrics"
+          enabled  = true
+        }
+      ]
     }
-    depends_on = [
-        module.rsv,
-        azapi_resource.law
-    ]
+  }
+  depends_on = [
+    module.rsv,
+    azapi_resource.law
+  ]
 }
